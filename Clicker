@@ -1,3 +1,4 @@
+
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
 local Network = require(NetworkLoader)
@@ -5,11 +6,22 @@ local Click = Network.GetFunction("ClickFunction")
 local Rebirth = Network.GetEvent("RebirthEvent")
 local vu = game:GetService("VirtualUser")
 
-local spamRemote = false
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local walkSpeedEnabled = false
+
+
+local oldSpeed = game.Players.LocalPlayer.Character.Humanoid.WalkSpeed
+
+local walkSpeed = 16
+
+local autoClick = false
+
+local autoRebirth = false
 local amount = 1
 
+local autoEgg = false 
 
-local Window = OrionLib:MakeWindow({Name = "Experience", HidePremium = true, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Window = OrionLib:MakeWindow({Name = "Clicking Simulator Education On Scripting ", HidePremium = true, SaveConfig = true, ConfigFolder = "ClickerSus"})
 
 local Tab = Window:MakeTab({
     Name = "Main",
@@ -25,12 +37,12 @@ Tab:AddToggle({
     Name = "AutoClick",
     Default = false,
     Callback = function(Value)
-        spamRemote = Value
+        autoClick = Value
         if Value then
             repeat
                 Click:Invoke("press")
                 task.wait(0.01)
-            until not spamRemote
+            until not autoClick
         end 
     end
 })
@@ -39,12 +51,12 @@ Tab:AddToggle({
     Name = "AutoRebirth",
     Default = false,
     Callback = function(Value)
-        spamRemote = Value
+        autoRebirth = Value
         if Value then
             repeat
                 Rebirth:Fire(amount)
                 task.wait(0.1)
-            until not spamRemote
+            until not autoRebirth
         end 
     end
 })
@@ -52,7 +64,7 @@ Tab:AddToggle({
 Tab:AddSlider({
     Name = "Amount of Rebirths",
     Min = 1,
-    Max = 100,
+    Max = 400,
     Default = 1,
     Color = Color3.fromRGB(255,255,255),
     Increment = 1,
@@ -72,13 +84,67 @@ Tab:AddButton({
         end)
     end
 })
+Tab:AddToggle({
+	Name = "Auto Open Egg",
+	Default = false,
+	Callback = function(Value)
+        autoEgg = Value 
+        if Value then 
+            repeat 
+                local UtilLoader = game:GetService("ReplicatedStorage").Modules.Utilities.UtilityLoader
+                local Util = require(UtilLoader)
+                local Dispenser = Util.GetUtility("dispenserUtility")
+                Dispenser.HatchEgg(1)
+task.wait(0.1)
+until not autoEgg 
+       end 
+	end    
+})
 
+local Tab = Window:MakeTab({
+    Name = "Player",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+Tab:AddToggle({
+    Name = "WalkSpeed",
+    Default = false,
+    Callback = function(Value)
+        walkSpeedEnabled = Value
+        if Value then
+            LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
+        else
+            LocalPlayer.Character.Humanoid.WalkSpeed = oldSpeed
+        end
+    end
+})
+Tab:AddSlider({
+    Name = "WalkSpeed",
+    Min = 16,
+    Max = 100,
+    Default = 16,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "IshowSpeed",
+    Callback = function(Value)
+        walkSpeed = Value
+if walkSpeedEnabled then
+    LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
+end
+    end
+})
 local Tab = Window:MakeTab({
     Name = "Credits",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
-
 Tab:AddParagraph("CynMod#7113","Helping me Get Started")
 Tab:AddParagraph("Blake.#1304","Bypasses and Modules")
 Tab:AddParagraph("Sigmarillion on v3rm","Anti-afk")
+
+OrionLib:MakeNotification({
+	Name = "Annoucement",
+	Content = "For auto egg must be close to the egg you want to hatch",
+	Image = "rbxassetid://4483345998",
+	Time = 5
+})

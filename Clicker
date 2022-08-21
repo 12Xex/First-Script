@@ -1,15 +1,25 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
+local Network = require(NetworkLoader)
+local Click = Network.GetFunction("ClickFunction")
+local Rebirth = Network.GetEvent("RebirthEvent")
+local vu = game:GetService("VirtualUser")
+
+local spamRemote = false
+local amount = 1
+
+
 local Window = OrionLib:MakeWindow({Name = "Experience", HidePremium = true, SaveConfig = true, ConfigFolder = "OrionTest"})
+
 local Tab = Window:MakeTab({
 	Name = "Main",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
+
 local Section = Tab:AddSection({
 	Name = "Features"
 })
-local spamRemote = false
-
 
 Tab:AddToggle({
     Name = "AutoClick",
@@ -18,10 +28,6 @@ Tab:AddToggle({
         spamRemote = Value
         if Value then
             repeat
-                local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
-                local Network = require(NetworkLoader)
-                local Click = Network.GetFunction("ClickFunction")
-                
                 Click:Invoke("press")
                 task.wait(0.01) --Change this to how fast you want it done.
             until not spamRemote
@@ -29,8 +35,6 @@ Tab:AddToggle({
     end    
 })
 
-local spamRemote = false  
-local amount = 1
 Tab:AddToggle({
     Name = "AutoRebirth",
     Default = false,
@@ -38,19 +42,12 @@ Tab:AddToggle({
         spamRemote = Value
         if Value then
             repeat
-                local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
-local Network = require(NetworkLoader)
-local Click = Network.GetFunction("ClickFunction")
-local Rebirth = Network.GetEvent("RebirthEvent")
-
-Click:Invoke("press")
-Rebirth:Fire(amount)
+                Rebirth:Fire(amount)
                 task.wait(0.1) --Change this to how fast you want it done.
             until not spamRemote
         end 
     end    
 })
-
 
 Tab:AddSlider({
     Name = "Amount of Rebirths",
@@ -64,24 +61,23 @@ Tab:AddSlider({
         amount = Value
     end    
 })
+
 Tab:AddButton({
 	Name = "Anti Afk",
 	Callback = function()
-        local vu = game:GetService("VirtualUser")
-game:GetService("Players").LocalPlayer.Idled:connect(function()
-   vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-   wait(1)
-   vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-end)
-      		print("button pressed")
+        game:GetService("Players").LocalPlayer.Idled:connect(function()
+            vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            wait(1)
+            vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        end)
   	end    
 })
+
 local Tab = Window:MakeTab({
 	Name = "Credits",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
-
 
 Tab:AddParagraph("CynMod#7113","Helping me Get Started")
 Tab:AddParagraph("Blake.#1304","Bypasses and Modules")

@@ -1,25 +1,25 @@
-
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
+local UtilLoader = game:GetService("ReplicatedStorage").Modules.Utilities.UtilityLoader
 local Network = require(NetworkLoader)
+local Util = require(UtilLoader)
 local Click = Network.GetFunction("ClickFunction")
 local Rebirth = Network.GetEvent("RebirthEvent")
+local Dispenser = Util.GetUtility("dispenserUtility")
 local vu = game:GetService("VirtualUser")
-
 local LocalPlayer = game:GetService("Players").LocalPlayer
+
 local walkSpeedEnabled = false
-
-
+local jumpPowerEnabled = false
 local oldSpeed = game.Players.LocalPlayer.Character.Humanoid.WalkSpeed
-
-local walkSpeed = 16
-
+local walkSpeed = oldSpeed
+local oldJumpPower = game.Players.LocalPlayer.Character.Humanoid.JumpPower
+local jumpPower = oldJumpPower
 local autoClick = false
-
 local autoRebirth = false
 local amount = 1
-
 local autoEgg = false 
+
 
 local Window = OrionLib:MakeWindow({Name = "Clicking Simulator Education On Scripting ", HidePremium = true, SaveConfig = true, ConfigFolder = "ClickerSus"})
 
@@ -91,12 +91,9 @@ Tab:AddToggle({
         autoEgg = Value 
         if Value then 
             repeat 
-                local UtilLoader = game:GetService("ReplicatedStorage").Modules.Utilities.UtilityLoader
-                local Util = require(UtilLoader)
-                local Dispenser = Util.GetUtility("dispenserUtility")
                 Dispenser.HatchEgg(1)
-task.wait(0.1)
-until not autoEgg 
+                task.wait(0.1)
+            until not autoEgg 
        end 
 	end    
 })
@@ -128,9 +125,36 @@ Tab:AddSlider({
     ValueName = "IshowSpeed",
     Callback = function(Value)
         walkSpeed = Value
-if walkSpeedEnabled then
-    LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
-end
+        if walkSpeedEnabled then
+            LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
+        end
+    end
+})
+Tab:AddToggle({
+    Name = "JumpPower",
+    Default = false,
+    Callback = function(Value)
+        jumpPowerEnabled = Value
+        if Value then
+            LocalPlayer.Character.Humanoid.JumpPower = jumpPower
+        else
+            LocalPlayer.Character.Humanoid.JumpPower = oldJumpPower
+        end
+    end
+})
+Tab:AddSlider({
+    Name = "JumpPower",
+    Min = 50,
+    Max = 500,
+    Default = 50,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "IshowJump",
+    Callback = function(Value)
+        jumpPower = Value
+        if jumpPowerEnabled then
+            LocalPlayer.Character.Humanoid.JumpPower = jumpPower
+        end
     end
 })
 local Tab = Window:MakeTab({

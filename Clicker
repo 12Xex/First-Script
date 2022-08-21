@@ -1,0 +1,88 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Experience", HidePremium = true, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Tab = Window:MakeTab({
+	Name = "Main",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+local Section = Tab:AddSection({
+	Name = "Features"
+})
+local spamRemote = false
+
+
+Tab:AddToggle({
+    Name = "AutoClick",
+    Default = false,
+    Callback = function(Value)
+        spamRemote = Value
+        if Value then
+            repeat
+                local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
+                local Network = require(NetworkLoader)
+                local Click = Network.GetFunction("ClickFunction")
+                
+                Click:Invoke("press")
+                task.wait(0.01) --Change this to how fast you want it done.
+            until not spamRemote
+        end 
+    end    
+})
+
+local spamRemote = false  
+local amount = 1
+Tab:AddToggle({
+    Name = "AutoRebirth",
+    Default = false,
+    Callback = function(Value)
+        spamRemote = Value
+        if Value then
+            repeat
+                local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
+local Network = require(NetworkLoader)
+local Click = Network.GetFunction("ClickFunction")
+local Rebirth = Network.GetEvent("RebirthEvent")
+
+Click:Invoke("press")
+Rebirth:Fire(amount)
+                task.wait(0.1) --Change this to how fast you want it done.
+            until not spamRemote
+        end 
+    end    
+})
+
+
+Tab:AddSlider({
+    Name = "Amount of Rebirths",
+    Min = 1,
+    Max = 100,
+    Default = 1,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "rebirths",
+    Callback = function(Value)
+        amount = Value
+    end    
+})
+Tab:AddButton({
+	Name = "Anti Afk",
+	Callback = function()
+        local vu = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+   vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+   wait(1)
+   vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+      		print("button pressed")
+  	end    
+})
+local Tab = Window:MakeTab({
+	Name = "Credits",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+
+Tab:AddParagraph("CynMod#7113","Helping me Get Started")
+Tab:AddParagraph("Blake.#1304","Bypasses and Modules")
+Tab:AddParagraph("Sigmarillion on v3rm","Anti-afk")

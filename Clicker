@@ -12,13 +12,13 @@ local amount = 1
 local Window = OrionLib:MakeWindow({Name = "Experience", HidePremium = true, SaveConfig = true, ConfigFolder = "OrionTest"})
 
 local Tab = Window:MakeTab({
-	Name = "Main",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
 })
 
 local Section = Tab:AddSection({
-	Name = "Features"
+    Name = "Features"
 })
 
 Tab:AddToggle({
@@ -29,10 +29,10 @@ Tab:AddToggle({
         if Value then
             repeat
                 Click:Invoke("press")
-                task.wait(0.01) --Change this to how fast you want it done.
+                task.wait(0.01)
             until not spamRemote
         end 
-    end    
+    end
 })
 
 Tab:AddToggle({
@@ -43,10 +43,10 @@ Tab:AddToggle({
         if Value then
             repeat
                 Rebirth:Fire(amount)
-                task.wait(0.1) --Change this to how fast you want it done.
+                task.wait(0.1)
             until not spamRemote
         end 
-    end    
+    end
 })
 
 Tab:AddSlider({
@@ -59,24 +59,24 @@ Tab:AddSlider({
     ValueName = "rebirths",
     Callback = function(Value)
         amount = Value
-    end    
+    end
 })
 
 Tab:AddButton({
-	Name = "Anti Afk",
-	Callback = function()
+    Name = "Anti Afk",
+    Callback = function()
         game:GetService("Players").LocalPlayer.Idled:connect(function()
             vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
             wait(1)
             vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
         end)
-  	end    
+    end
 })
 
 local Tab = Window:MakeTab({
-	Name = "Credits",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+    Name = "Credits",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
 })
 
 Tab:AddParagraph("CynMod#7113","Helping me Get Started")

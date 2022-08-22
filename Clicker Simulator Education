@@ -1,3 +1,4 @@
+
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
 local UtilLoader = game:GetService("ReplicatedStorage").Modules.Utilities.UtilityLoader
@@ -61,17 +62,15 @@ Tab:AddToggle({
     end
 })
 
-Tab:AddSlider({
-    Name = "Amount of Rebirths",
-    Min = 1,
-    Max = 400,
-    Default = 1,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1,
-    ValueName = "rebirths",
-    Callback = function(Value)
-        amount = Value
-    end
+Tab:AddDropdown({
+	Name = "Rebirths",
+	Default = "1",
+	Options = {"1", "5","20","80","400","2000","10000","40000","100000","400000"},
+	Callback = function(Value)
+		amount = tonumber(Value)
+        task.wait(0.1)
+    
+	 end    
 })
 
 Tab:AddButton({
@@ -168,7 +167,8 @@ Tab:AddParagraph("Sigmarillion on v3rm","Anti-afk")
 
 OrionLib:MakeNotification({
 	Name = "Annoucement",
-	Content = "For auto egg must be close to the egg you want to hatch",
+	Content = "Must Be in proximity of the egg for the script to work",
 	Image = "rbxassetid://4483345998",
 	Time = 5
 })
+

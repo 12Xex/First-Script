@@ -1,4 +1,3 @@
-
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
 local UtilLoader = game:GetService("ReplicatedStorage").Modules.Utilities.UtilityLoader
@@ -164,6 +163,7 @@ local Tab = Window:MakeTab({
 Tab:AddParagraph("CynMod#7113","Helping me Get Started")
 Tab:AddParagraph("Blake.#1304","Bypasses and Modules")
 Tab:AddParagraph("Sigmarillion on v3rm","Anti-afk")
+Tab:AddParagraph("Shaddow#8715","Additional help")
 
 OrionLib:MakeNotification({
 	Name = "Annoucement",

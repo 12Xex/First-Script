@@ -21,7 +21,7 @@ local amount = 1
 local autoEgg = false 
 
 
-local Window = OrionLib:MakeWindow({Name = "Clicking Simulator Education On Scripting ", HidePremium = true, SaveConfig = true, ConfigFolder = "ClickerSus"})
+local Window = OrionLib:MakeWindow({Name = "12x Ware", HidePremium = true, SaveConfig = true, ConfigFolder = "ClickerSus"})
 
 local Tab = Window:MakeTab({
     Name = "Main",

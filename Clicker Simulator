@@ -1,174 +1,233 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local NetworkLoader = game:GetService("ReplicatedStorage").Modules.Utilities.ServiceLoader.NetworkService
-local UtilLoader = game:GetService("ReplicatedStorage").Modules.Utilities.UtilityLoader
-local Network = require(NetworkLoader)
-local Util = require(UtilLoader)
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
+
+local Utilities = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Utilities")
+local Network = require(Utilities:WaitForChild("ServiceLoader"):WaitForChild("NetworkService"))
+local Util = require(Utilities:WaitForChild("UtilityLoader"))
 local Click = Network.GetFunction("ClickFunction")
 local Rebirth = Network.GetEvent("RebirthEvent")
 local Dispenser = Util.GetUtility("dispenserUtility")
-local vu = game:GetService("VirtualUser")
-local LocalPlayer = game:GetService("Players").LocalPlayer
 
-local walkSpeedEnabled = false
-local jumpPowerEnabled = false
-local oldSpeed = game.Players.LocalPlayer.Character.Humanoid.WalkSpeed
-local walkSpeed = oldSpeed
-local oldJumpPower = game.Players.LocalPlayer.Character.Humanoid.JumpPower
-local jumpPower = oldJumpPower
-local autoClick = false
-local autoRebirth = false
-local amount = 1
-local autoEgg = false 
+local LocalPlayer = Players.LocalPlayer
 
+local DEFAULT_WALKSPEED = 16
+local DEFAULT_JUMPPOWER = 50
+
+local settings = {
+    autoClick = false,
+    autoRebirth = false,
+    autoEgg = false,
+    rebirthAmount = 1,
+    walkSpeedEnabled = false,
+    walkSpeed = DEFAULT_WALKSPEED,
+    jumpPowerEnabled = false,
+    jumpPower = DEFAULT_JUMPPOWER,
+}
+
+local function getHumanoid()
+    local character = LocalPlayer.Character
+    return character and character:FindFirstChildOfClass("Humanoid")
+end
+
+local function applyMovement()
+    local humanoid = getHumanoid()
+    if not humanoid then
+        return
+    end
+    humanoid.WalkSpeed = settings.walkSpeedEnabled and settings.walkSpeed or DEFAULT_WALKSPEED
+    humanoid.UseJumpPower = true
+    humanoid.JumpPower = settings.jumpPowerEnabled and settings.jumpPower or DEFAULT_JUMPPOWER
+end
+
+-- Re-apply movement settings after respawning
+LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+    applyMovement()
+end)
+
+-- Runs `action` every `delay` seconds while settings[flag] is true.
+-- Spawned in its own thread so toggle callbacks (and config loading) never block.
+local loopRunning = {}
+local function startLoop(flag, delay, action)
+    if loopRunning[flag] then
+        return
+    end
+    loopRunning[flag] = true
+    task.spawn(function()
+        while settings[flag] do
+            local ok, err = pcall(action)
+            if not ok then
+                warn("[12x Ware] " .. flag .. " error: " .. tostring(err))
+            end
+            task.wait(delay)
+        end
+        loopRunning[flag] = false
+    end)
+end
 
 local Window = OrionLib:MakeWindow({Name = "12x Ware", HidePremium = true, SaveConfig = true, ConfigFolder = "ClickerSus"})
 
-local Tab = Window:MakeTab({
+-- Main tab
+local MainTab = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
-local Section = Tab:AddSection({
+MainTab:AddSection({
     Name = "Features"
 })
 
-Tab:AddToggle({
+MainTab:AddToggle({
     Name = "AutoClick",
     Default = false,
+    Save = true,
+    Flag = "AutoClick",
     Callback = function(Value)
-        autoClick = Value
+        settings.autoClick = Value
         if Value then
-            repeat
+            startLoop("autoClick", 0.01, function()
                 Click:Invoke("press")
-                task.wait(0.01)
-            until not autoClick
-        end 
+            end)
+        end
     end
 })
 
-Tab:AddToggle({
+MainTab:AddToggle({
     Name = "AutoRebirth",
     Default = false,
+    Save = true,
+    Flag = "AutoRebirth",
     Callback = function(Value)
-        autoRebirth = Value
+        settings.autoRebirth = Value
         if Value then
-            repeat
-                Rebirth:Fire(amount)
-                task.wait(0.1)
-            until not autoRebirth
-        end 
+            startLoop("autoRebirth", 0.1, function()
+                Rebirth:Fire(settings.rebirthAmount)
+            end)
+        end
     end
 })
 
-Tab:AddDropdown({
-	Name = "Rebirths",
-	Default = "1",
-	Options = {"1", "5","20","80","400","2000","10000","40000","100000","400000"},
-	Callback = function(Value)
-		amount = tonumber(Value)
-        task.wait(0.1)
-    
-	 end    
-})
-
-Tab:AddButton({
-    Name = "Anti Afk",
-    Callback = function()
-        game:GetService("Players").LocalPlayer.Idled:connect(function()
-            vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-            wait(1)
-            vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-        end)
+MainTab:AddDropdown({
+    Name = "Rebirths",
+    Default = "1",
+    Options = {"1", "5", "20", "80", "400", "2000", "10000", "40000", "100000", "400000"},
+    Save = true,
+    Flag = "RebirthAmount",
+    Callback = function(Value)
+        settings.rebirthAmount = tonumber(Value) or 1
     end
 })
-Tab:AddToggle({
-	Name = "Auto Open Egg",
-	Default = false,
-	Callback = function(Value)
-        autoEgg = Value 
-        if Value then 
-            repeat 
+
+MainTab:AddToggle({
+    Name = "Auto Open Egg",
+    Default = false,
+    Save = true,
+    Flag = "AutoEgg",
+    Callback = function(Value)
+        settings.autoEgg = Value
+        if Value then
+            startLoop("autoEgg", 0.1, function()
                 Dispenser.HatchEgg(1)
-                task.wait(0.1)
-            until not autoEgg 
-       end 
-	end    
+            end)
+        end
+    end
 })
 
-local Tab = Window:MakeTab({
+local antiAfkConnection
+MainTab:AddToggle({
+    Name = "Anti Afk",
+    Default = false,
+    Save = true,
+    Flag = "AntiAfk",
+    Callback = function(Value)
+        if Value and not antiAfkConnection then
+            antiAfkConnection = LocalPlayer.Idled:Connect(function()
+                local camera = workspace.CurrentCamera
+                VirtualUser:Button2Down(Vector2.new(0, 0), camera.CFrame)
+                task.wait(1)
+                VirtualUser:Button2Up(Vector2.new(0, 0), camera.CFrame)
+            end)
+        elseif not Value and antiAfkConnection then
+            antiAfkConnection:Disconnect()
+            antiAfkConnection = nil
+        end
+    end
+})
+
+-- Player tab
+local PlayerTab = Window:MakeTab({
     Name = "Player",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
-Tab:AddToggle({
+
+PlayerTab:AddToggle({
     Name = "WalkSpeed",
     Default = false,
     Callback = function(Value)
-        walkSpeedEnabled = Value
-        if Value then
-            LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
-        else
-            LocalPlayer.Character.Humanoid.WalkSpeed = oldSpeed
-        end
+        settings.walkSpeedEnabled = Value
+        applyMovement()
     end
 })
-Tab:AddSlider({
+
+PlayerTab:AddSlider({
     Name = "WalkSpeed",
-    Min = 16,
+    Min = DEFAULT_WALKSPEED,
     Max = 100,
-    Default = 16,
-    Color = Color3.fromRGB(255,255,255),
+    Default = DEFAULT_WALKSPEED,
+    Color = Color3.fromRGB(255, 255, 255),
     Increment = 1,
     ValueName = "IshowSpeed",
     Callback = function(Value)
-        walkSpeed = Value
-        if walkSpeedEnabled then
-            LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
-        end
+        settings.walkSpeed = Value
+        applyMovement()
     end
 })
-Tab:AddToggle({
+
+PlayerTab:AddToggle({
     Name = "JumpPower",
     Default = false,
     Callback = function(Value)
-        jumpPowerEnabled = Value
-        if Value then
-            LocalPlayer.Character.Humanoid.JumpPower = jumpPower
-        else
-            LocalPlayer.Character.Humanoid.JumpPower = oldJumpPower
-        end
+        settings.jumpPowerEnabled = Value
+        applyMovement()
     end
 })
-Tab:AddSlider({
+
+PlayerTab:AddSlider({
     Name = "JumpPower",
-    Min = 50,
+    Min = DEFAULT_JUMPPOWER,
     Max = 500,
-    Default = 50,
-    Color = Color3.fromRGB(255,255,255),
+    Default = DEFAULT_JUMPPOWER,
+    Color = Color3.fromRGB(255, 255, 255),
     Increment = 1,
     ValueName = "IshowJump",
     Callback = function(Value)
-        jumpPower = Value
-        if jumpPowerEnabled then
-            LocalPlayer.Character.Humanoid.JumpPower = jumpPower
-        end
+        settings.jumpPower = Value
+        applyMovement()
     end
 })
-local Tab = Window:MakeTab({
+
+-- Credits tab
+local CreditsTab = Window:MakeTab({
     Name = "Credits",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
-Tab:AddParagraph("CynMod#7113","Helping me Get Started")
-Tab:AddParagraph("Blake.#1304","Bypasses and Modules")
-Tab:AddParagraph("Sigmarillion on v3rm","Anti-afk")
-Tab:AddParagraph("Shaddow#8715","Additional help")
+CreditsTab:AddParagraph("CynMod#7113", "Helping me Get Started")
+CreditsTab:AddParagraph("Blake.#1304", "Bypasses and Modules")
+CreditsTab:AddParagraph("Sigmarillion on v3rm", "Anti-afk")
+CreditsTab:AddParagraph("Shaddow#8715", "Additional help")
 
 OrionLib:MakeNotification({
-	Name = "Annoucement",
-	Content = "Must Be in proximity of the egg for the script to work",
-	Image = "rbxassetid://4483345998",
-	Time = 5
+    Name = "Announcement",
+    Content = "Must be in proximity of the egg for Auto Open Egg to work",
+    Image = "rbxassetid://4483345998",
+    Time = 5
 })
 
+-- Required for SaveConfig to load saved toggle/dropdown values
+OrionLib:Init()

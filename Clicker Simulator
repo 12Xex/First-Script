@@ -1,4 +1,12 @@
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+-- The original shlexware/Orion repo was deleted; this is a maintained mirror with the same API
+local ORION_URL = "https://raw.githubusercontent.com/jensonhirst/Orion/main/source"
+
+local fetched, orionSource = pcall(game.HttpGet, game, ORION_URL)
+local orionLoader = fetched and loadstring(orionSource)
+if not orionLoader then
+    error("[12x Ware] Failed to load Orion UI library from " .. ORION_URL .. " - the link may be down")
+end
+local OrionLib = orionLoader()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
